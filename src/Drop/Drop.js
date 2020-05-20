@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import './Drop.css'
 
 /**
@@ -26,64 +26,53 @@ const status = {
         message: "yummy...😋 Drop something more"
     },
 };
-export default class Drop extends Component {
+export default function Drop (props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            status: 'default',
-            worker: new Worker('/workers/parseObj.js'),
-            list: []
-        }
-        this.state.worker.addEventListener('message', e => {
-            //this.state.list = e.data;
-            this.props.onGetList(e.data);
-            this.setState({ status: 'parsed' })
-            /*self.$store.dispatch("updateStore", {
-                incoming: e.data,
-              });*/
-        }, false);
-        this.handleFileSelect = this.handleFileSelect.bind(this)
-    }
+    const [dropState, setDropState] = useState({
+        status: 'default'
+      })
 
-    preventDrag(e) {
+    const worker = new Worker('/workers/parseObj.js')
+
+    worker.addEventListener('message', e => {
+        props.onGetList(e.data);
+        setDropState({ status: 'parsed' })
+    }, false)
+
+    const preventDrag = (e) => {
         e.stopPropagation();
         e.preventDefault();
     }
-    handleDragOut(e) {
-        this.preventDrag(e);
-        this.setState({ status: "hoveredOut" })
+    const handleDragOut = (e) => {
+        preventDrag(e);
+        setDropState({ status: "hoveredOut" })
     }
-    handleDragOver(e) {
-        this.preventDrag(e);
-        this.setState({ status: "hovered" })
+    const handleDragOver = (e) => {
+        preventDrag(e);
+        setDropState({ status: "hovered" })
     }
-    handleFileSelect(e) {
-        this.setState({ status: "dropped" })
-        this.preventDrag(e);
-        console.log(this.state);
+    const handleFileSelect = (e) => {
+        setDropState({ status: "dropped" })
+        preventDrag(e);
         let reader = new FileReader();
         reader.readAsText(e.dataTransfer.files[0]);
         reader.onload = () => {
-            this.state.worker.postMessage({ str: reader.result });
+            worker.postMessage({ str: reader.result });
         };
 
     }
-    render() {
-        let classList = ['drop'];
-        classList.push(status[this.state.status].className);
-        return (
-            <div>
-                <div className={classList.join(" ")}
-                    onDragLeave={this.handleDragOut.bind(this)}
-                    onDragOver={this.handleDragOver.bind(this)}
-                    onDrop={this.handleFileSelect}>
-                    <div className="message">{status[this.state.status].message}</div>
-                    <div className="eye"></div>
-                    <div className="eye eye--right"></div>
-                    <div className="mouth"></div>
-                </div>
+    let classList = ['drop',status[dropState.status].className]
+    return (
+        <div>
+            <div className={classList.join(" ")}
+                onDragLeave={handleDragOut.bind(this)}
+                onDragOver={handleDragOver.bind(this)}
+                onDrop={handleFileSelect}>
+                <div className="message">{status[dropState.status].message}</div>
+                <div className="eye"></div>
+                <div className="eye eye--right"></div>
+                <div className="mouth"></div>
             </div>
-        )
-    }
+        </div>
+    );
 }
