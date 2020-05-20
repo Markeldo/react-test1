@@ -3,7 +3,7 @@ import ListItem from '../ListItem/ListItem'
 
 const List = (props) => {
     return (
-        <ul onScroll={(e) => props.onScroll(e)}>
+        <ul onScroll={(e) => props.onScroll(e.target.scrollTop)}>
             <li className="dummy dummy--before" style={{ height: props.dummyBeforeHeight }}></li>
             {props.listItems.map(item => {
                 return <ListItem key={item.id} id={item.id} user={item.user} />

@@ -44,7 +44,7 @@ export default function App(props) {
         <Drop onGetList={list => { onGetListHandler(list); }} />
 
         <List
-          onScroll={(e) => defineDummiesHeight(e.target.scrollTop)}
+          onScroll={defineDummiesHeight}
           listItems={slicedList}
           dummyAfterHeight={common.dummyAfterHeight}
           dummyBeforeHeight={common.dummyBeforeHeight}
