@@ -1,18 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import Drop from './Drop/Drop'
 import List from './List/List'
+import Context from './context'
 
 export default function App(props) {
   const [list, setList] = useState([]) // список элементов
   const [common, setCommon] = useState({
-    scrollTop: 0,                   // последнее известное значение скроллТопа
     dummyBeforeHeight: 0,           // высота болванки перед куском выводимого списка
     dummyAfterHeight: 0,            // высота болванки под куском выводимого списка
     startRenderFrom: 0,             // стартовая позиция, с которой будет браться кусок для вывода
   })
-  const renderItemsCount = 10 
-  const ulRef = useRef(null)
+  const renderItemsCount = 10
 
   const onGetListHandler = (list) => {
     setList(list.map((item, index) => ({ id: index, user: item })))
@@ -30,7 +29,6 @@ export default function App(props) {
     const d2h = (listLength - from - renderItemsCount) * 42
 
     setCommon({
-      scrollTop: scrolledPixels,
       startRenderFrom: from,
       dummyBeforeHeight: d1h < 0 ? 0 : d1h,
       dummyAfterHeight: d2h < 0 ? 0 : d2h
@@ -40,13 +38,19 @@ export default function App(props) {
   const slicedList = list.slice(common.startRenderFrom, common.startRenderFrom + renderItemsCount)
 
   return (
-    <div className="app">
-      <Drop onGetList={list => { onGetListHandler(list); }} />
-      <ul ref={ulRef} onScroll={(e) => defineDummiesHeight(e.target.scrollTop)}>
-        <li className="dummy dummy--before" style={{ height: common.dummyBeforeHeight }}></li>
-        <List onDelete={onDeleteHandler} listItems={slicedList} />
-        <li className="dummy dummy--after" style={{ height: common.dummyAfterHeight }}></li>
-      </ul>
-    </div>
+    <Context.Provider value={{ onDeleteHandler }}>
+      <div className="app">
+
+        <Drop onGetList={list => { onGetListHandler(list); }} />
+
+        <List
+          onScroll={(e) => defineDummiesHeight(e.target.scrollTop)}
+          listItems={slicedList}
+          dummyAfterHeight={common.dummyAfterHeight}
+          dummyBeforeHeight={common.dummyBeforeHeight}
+        />
+
+      </div>
+    </Context.Provider>
   );
 }
