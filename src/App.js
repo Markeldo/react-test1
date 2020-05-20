@@ -38,19 +38,19 @@ export default function App(props) {
   const slicedList = list.slice(common.startRenderFrom, common.startRenderFrom + renderItemsCount)
 
   return (
-    <Context.Provider value={{ onDeleteHandler }}>
       <div className="app">
 
         <Drop onGetList={list => { onGetListHandler(list); }} />
 
+        <Context.Provider value={{ onDeleteHandler }}>
         <List
           onScroll={defineDummiesHeight}
           listItems={slicedList}
           dummyAfterHeight={common.dummyAfterHeight}
           dummyBeforeHeight={common.dummyBeforeHeight}
         />
+        </Context.Provider>
 
       </div>
-    </Context.Provider>
   );
 }
